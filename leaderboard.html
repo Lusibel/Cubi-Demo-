@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaderboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: center;
+        }
+        .user-time {
+            margin: 10px 0;
+            font-size: 20px;
+            background-color: purple;
+        }
+        .leaderboard-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .leaderboard-column {
+            width: 45%;
+            padding: 0 10px;
+            background-color: purple;
+        }
+        .leaderboard {
+            margin: 0;
+            padding: 0;
+        }
+        .leaderboard-item {
+            margin: 5px 0;
+            font-size: 20px;
+            line-height: 1.5;
+            white-space: nowrap; /* Prevent line breaks */
+            overflow: hidden;    /* Hide overflow */
+            text-align: left;    /* Align text to the left */
+            padding: 0 10px;    /* Add padding to prevent text from touching edges */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+        }
+        .input-container {
+            display: none;
+            margin: 20px 0;
+        }
+        .input-container input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        .input-container button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .restart-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: red;
+        }
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: red;
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+        .footer-text {
+            margin-top: 0px;
+            font-size: 0px;
+            background-color: purple;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CUBI</h1>
+        <p><h3>tabla de clasificasion</h3></p>
+        <div class="user-time" id="userTime">
+        </div>
+        <div class="leaderboard-container">
+            <div class="leaderboard leaderboard-column" id="leaderboardLeft">
+            </div>
+            <div class="leaderboard leaderboard-column" id="leaderboardRight">
+            </div>
+        </div>
+        <div class="input-container" id="inputContainer">
+            <input type="text" id="playerName" placeholder="Enter your name">
+            <button id="submitNameButton">Subir</button>
+        </div>
+        <button class="restart-button" id="restartButton">INICIAR</button>
+        <div class="footer-text">
+        </div>
+    </div>
+    <script>
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        const leaderboardLeft = document.getElementById('leaderboardLeft');
+        const leaderboardRight = document.getElementById('leaderboardRight');
+        const inputContainer = document.getElementById('inputContainer');
+        const playerNameInput = document.getElementById('playerName');
+        const submitNameButton = document.getElementById('submitNameButton');
+        const restartButton = document.getElementById('restartButton');
+        const userTimeElement = document.getElementById('userTime');
+
+        function updateLeaderboard() {
+            leaderboardLeft.innerHTML = '';
+            leaderboardRight.innerHTML = '';
+            leaderboard.slice(0, 5).forEach((record, index) => {
+                const recordElement = document.createElement('div');
+                recordElement.className = 'leaderboard-item';
+                recordElement.textContent = `${index + 1}. ${record.name} - ${record.time}s`;
+                leaderboardLeft.appendChild(recordElement);
+            });
+
+            leaderboard.slice(5, 10).forEach((record, index) => {
+                const recordElement = document.createElement('div');
+                recordElement.className = 'leaderboard-item';
+                recordElement.textContent = `${index + 6}. ${record.name} - ${record.time}s`;
+                leaderboardRight.appendChild(recordElement);
+            });
+
+            const resetButton = document.createElement('button');
+            resetButton.className = 'reset-button hidden';
+            resetButton.textContent = 'Reset Leaderboard';
+            resetButton.onclick = () => {
+                localStorage.removeItem('leaderboard');
+                leaderboard = [];
+                updateLeaderboard();
+            };
+            leaderboardLeft.appendChild(resetButton);
+
+            userTimeElement.innerHTML = localStorage.getItem('endTime') 
+                ? `Your Time: ${parseFloat(localStorage.getItem('endTime'))}s` 
+                : 'Your Time: --s';
+        }
+
+        function checkAndAddRecord(time) {
+            if (leaderboard.length < 10 || time < leaderboard[leaderboard.length - 1].time) {
+                inputContainer.style.display = 'block';
+                submitNameButton.onclick = () => {
+                    const playerName = playerNameInput.value.trim().substring(0, 10); // Limit name length to 10 characters
+                    if (playerName) {
+                        leaderboard.push({ name: playerName, time: time });
+                        leaderboard.sort((a, b) => a.time - b.time);
+                        if (leaderboard.length > 10) leaderboard.pop();
+                        localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+                        updateLeaderboard();
+                        inputContainer.style.display = 'none';
+                    }
+                };
+            }
+        }
+
+        restartButton.onclick = () => {
+            const currentUrl = window.location.href;
+            let redirectUrl = 'MiJuego .html';
+            if (currentUrl.includes('leaderboard.html')) {
+                redirectUrl = 'MiJuego .html';
+            } else {
+                redirectUrl = currentUrl.replace('leaderboard.html', 'MiJuego .html');
+            }
+            window.location.href = redirectUrl;
+        };
+
+        updateLeaderboard();
+
+        const endTime = localStorage.getItem('endTime');
+        if (endTime) {
+            checkAndAddRecord(parseFloat(endTime));
+            localStorage.removeItem('endTime');
+        }
+    </script>
+</body>
+</html>
