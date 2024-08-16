@@ -169,11 +169,11 @@
 
         restartButton.onclick = () => {
             const currentUrl = window.location.href;
-            let redirectUrl = 'MiJuego .html';
+            let redirectUrl = 'index.html';
             if (currentUrl.includes('leaderboard.html')) {
-                redirectUrl = 'MiJuego .html';
+                redirectUrl = 'index.html';
             } else {
-                redirectUrl = currentUrl.replace('leaderboard.html', 'MiJuego .html');
+                redirectUrl = currentUrl.replace('leaderboard.html', 'index.html');
             }
             window.location.href = redirectUrl;
         };
